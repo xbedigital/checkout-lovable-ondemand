@@ -37,7 +37,7 @@ document.getElementById("comprar").addEventListener("click", async () => {
     return;
   }
 
-  const res = await fetch("https://projetoondemand-f3ugay4qk-xbedigital.vercel.app/api/criar-pagamento", {
+  const res = await fetch("https://checkout-lovable-ondemand-h9ps7fm21-xbedigital.vercel.app", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ itens: itensSelecionados, email })
