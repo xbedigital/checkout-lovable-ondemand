@@ -1,15 +1,15 @@
 module.exports = async (req, res) => {
-  // 🔥 CORS COMPLETO
+  // Permitir requisições de qualquer lugar (CORS)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  // 🔥 RESPONDE PREFLIGHT (ESSENCIAL)
+  // Responde pré-verificação do navegador
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // 🔥 BLOQUEIA MÉTODOS ERRADOS
+  // Só aceitar POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
   }
@@ -46,4 +46,3 @@ module.exports = async (req, res) => {
     });
   }
 };
-console.log("Token Mercado Pago:", process.env.MP_ACCESS_TOKEN);
