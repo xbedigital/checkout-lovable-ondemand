@@ -46,3 +46,4 @@ module.exports = async (req, res) => {
     });
   }
 };
+console.log("Token Mercado Pago:", process.env.MP_ACCESS_TOKEN);
