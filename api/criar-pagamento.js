@@ -1,23 +1,17 @@
 export default async function handler(req, res) {
-  // 🔥 CORS COMPLETO
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-CSRF-Token, X-Requested-With, Accept, Content-Type, Authorization"
-  );
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // 🔥 RESPONDE PREFLIGHT CORRETAMENTE
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  try {
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Método não permitido" });
-    }
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método não permitido" });
+  }
 
+  try {
     const { itens, email } = req.body;
 
     const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
@@ -39,13 +33,13 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (!data.init_point) {
-      return res.status(500).json({ error: data });
-    }
-
-    return res.status(200).json({ init_point: data.init_point });
+    return res.status(200).json({
+      init_point: data.init_point
+    });
 
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({
+      error: error.message
+    });
   }
 }
