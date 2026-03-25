@@ -1,52 +1,47 @@
-import mercadopago from "mercadopago";
-
-// Configurar seu access token do Mercado Pago
-mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
-
 export default async function handler(req, res) {
-  // Habilita CORS
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // 🔥 CORS CORRIGIDO
+  res.setHeader("Access-Control-Allow-Origin", "https://xbedigital.com");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+  // 🔥 ESSENCIAL para o preflight (resolve seu erro)
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  if (req.method === "POST") {
-    try {
-      const { itens, email } = req.body;
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método não permitido" });
+  }
 
-      // Monta os itens para a preferência do Mercado Pago
-      const itemsMP = itens.map(item => ({
-        title: item.nome,
-        quantity: item.qtd,
-        unit_price: item.preco,
-        currency_id: "BRL"
-      }));
+  try {
+    const { itens, email } = req.body;
 
-      // Cria preferência
-      const preference = {
-        items: itemsMP,
-        payer: {
-          email: email || "cliente@exemplo.com" // padrão se não passar
-        },
-        back_urls: {
-          success: "https://seusite.com/sucesso", // coloque sua URL de sucesso
-          failure: "https://seusite.com/falha",
-          pending: "https://seusite.com/pendente"
-        },
-        auto_return: "approved"
-      };
+    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`
+      },
+      body: JSON.stringify({
+        items: itens.map(item => ({
+          title: item.nome,
+          quantity: item.qtd,
+          unit_price: item.preco,
+          currency_id: "BRL"
+        })),
+        payer: { email }
+      })
+    });
 
-      const response = await mercadopago.preferences.create(preference);
+    const data = await response.json();
 
-      return res.status(200).json({ init_point: response.body.init_point });
-    } catch (error) {
-      console.error("Erro ao criar preferência:", error);
-      return res.status(500).json({ error: "Erro ao criar preferência" });
-    }
-  } else {
-    res.status(405).json({ message: "Method not allowed" });
+    return res.status(200).json({
+      init_point: data.init_point
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message
+    });
   }
 }
